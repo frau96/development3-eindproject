@@ -2,6 +2,9 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="be.example.development3_eindproject">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Permissie om met het internet te verbinden -->
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
