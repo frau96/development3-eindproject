@@ -53,9 +53,9 @@ public class MainActivity extends AppCompatActivity {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        // Eerste repsonse wordt getoond als request mogelijk is
+                        // Eerste response wordt getoond als request mogelijk is
 
-                        //mTextViewResult.setText("API succesvol ingeladen :)))))");
+                        mTextViewResult.setText("API succesvol ingeladen :)))))");
                         //mTextViewResult.setText("Dit is een tweede regel tekst");
                         parseData(response);
                     }
@@ -76,8 +76,8 @@ public class MainActivity extends AppCompatActivity {
             JSONArray jsonArray = new JSONArray(response);
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject jsonObject = jsonArray.getJSONObject(i);
-                //mTextViewResult.setText(jsonObject.getString("portfolioitems"));
-                mTextViewResult.setText("En nu enkel nog de juiste data fixen :p");
+                mTextViewResult.setText(jsonObject.getString("id"));
+                //mTextViewResult.setText("En nu enkel nog de juiste data fixen...");
             }
         } catch (JSONException e) {
             e.printStackTrace();
