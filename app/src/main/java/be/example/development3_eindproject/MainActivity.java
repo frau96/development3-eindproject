@@ -2,9 +2,13 @@ package be.example.development3_eindproject;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.app.ProgressDialog;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.widget.ArrayAdapter;
 import android.util.Log;
+import android.widget.ListView;
+import android.widget.Toast;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -23,91 +27,58 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.net.URL;
+import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView mTextViewResult;
-
-    static final String JsonUrlStr = "https://my.api.mockaroo.com/portfolioitems.json?key=7b107dd0";
-
-    LinearLayout rootLayout;
-    //
-    private RequestQueue mQueue;
+    ListView portfolioList;
+    String url = "https://next.json-generator.com/api/json/get/4JCe-rNRF";
+    ProgressDialog dialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rootLayout = findViewById(R.id.list_view);
+//        listView = (listView)findViewById(R.id.list_view);
 
-        try {
-            URL url = new URL(JsonUrlStr);
+        portfolioList = (ListView) findViewById(R.id.list_view);
 
-            FetchPortfolio getDataTask = new FetchPortfolio();
-            getDataTask.execute(url);
-        }
-        catch (JSONException e) {
-            e.printStackTrace();
-        }
-    }
+        dialog = new ProgressDialog(this);
+        dialog.setMessage("Loading....");
+        dialog.show();
 
-    public class FetchPortfolio extends AsyncTask<URL, Void, Item[]> {
-        final String TAG = FetchPortfolio.class.getSimpleName();
-
-        URL url;
-
-        @Override
-        protected Item[] doInBackground(URL... params) {
-            url = params[0];
-
-            if(url.toString().contains(.json)){
-                return FetchPortfolioAsJSON();
-            }
-            return new Item[0];
-        }
-
-        @Override
-        protected void onPostExecute(Item[] items) {
-            for (Item item: items) {
-
-                View portfolioView = getLayoutInflater().inflate(R.layout.list_item, null);
-
-                TextView titleView = portfolioView.findViewById(R.id.title);
-                titleView.setText(String.format("%s", item.getTitle()));
-
-                rootLayout.addView(portfolioView);
-            }
-        }
-
-    }
-
-    private void jsonParse() {
-
-        String url = "https://my.api.mockaroo.com/portfolioitems.json?key=7b107dd0";
-
-        JsonArrayRequest request = new JsonArrayRequest(Request.Method.GET, url, null,
-                new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray response) {
-                        try {
-
-                            for(int i = 0; i< response.length();i++){
-                                JSONObject portfolio = response.getJSONObject(i);
-
-                                String title = portfolio.getString("title");
-                                // String omschrijving = portfolio.getString("description");
-                            }
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, new Response.ErrorListener() {
+        StringRequest request = new StringRequest(url, new Response.Listener<String>() {
             @Override
-            public void onErrorResponse(VolleyError error) {
-                error.printStackTrace();
-                // Tweede wordt getoond als er een error is
+            public void onResponse(String string) {
+                parseJsonData(string);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(getApplicationContext(), "Some error occurred...", Toast.LENGTH_SHORT).show();
+                dialog.dismiss();
             }
         });
+        RequestQueue rQueue = Volley.newRequestQueue(MainActivity.this);
+        rQueue.add(request);
+    }
+    void parseJsonData(String jsonString) {
+        try {
+            JSONObject object = new JSONObject(jsonString);
+            JSONArray portfolioArray = object.getJSONArray("portfolio");
+            ArrayList al = new ArrayList();
+
+            for(int i = 0; i < portfolioArray.length(); ++i) {
+                al.add(portfolioArray.getString(i));
+            }
+
+            ArrayAdapter adapter = new ArrayAdapter(this, android.R.layout.simple_list_item_1, al);
+            portfolioList.setAdapter(adapter);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        dialog.dismiss();
     }
 }
